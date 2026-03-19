@@ -1,0 +1,73 @@
+{
+  "projectType": "saas",
+  "projectName": "CIDTES Energía y Sustentabilidad",
+  "projectDescription": "Official website for CIDTES, an interdisciplinary organization offering training, certification, consulting, and applied research in energy, sustainability, and occupational health with over 20 years of expertise.",
+  "theme": "almond",
+  "primaryColor": "#1c1c1c",
+  "lightColor": "#385CAF",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Overview",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": ["introduction", "quickstart"]
+          },
+          {
+            "group": "About CIDTES",
+            "pages": ["about/who-we-are", "about/mission-vision", "about/commitments"]
+          }
+        ]
+      },
+      {
+        "tab": "Services",
+        "groups": [
+          {
+            "group": "Core Services",
+            "pages": [
+              "services/overview",
+              "services/capacitacion",
+              "services/certificacion",
+              "services/consultoria",
+              "services/investigacion-consultoria",
+              "services/cursos"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Development",
+        "groups": [
+          {
+            "group": "Technical Guide",
+            "pages": ["development/setup", "development/project-structure", "development/deployment"]
+          },
+          {
+            "group": "Components",
+            "pages": ["development/components/nav-header", "development/components/diagrama-circular", "development/components/certification-wheel"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Training and workshops in energy, sustainability, and occupational safety",
+    "Labor competency certification processes accredited by CONOCER",
+    "Specialized consulting in energy management and sustainable development",
+    "Applied research in renewable energy and sustainability",
+    "Full course catalog organized by category (Energy, Safety, Personal Development, etc.)",
+    "Interactive service diagram with animated circular navigation",
+    "Client portfolio showcase with partner and collaboration carousels",
+    "Responsive Next.js 14 frontend with Tailwind CSS and Radix UI components"
+  ],
+  "publicApiSurface": [
+    "GET / — Home page (Who we are, commitments, mission/vision, clients)",
+    "GET /capacitacion — Training methodology and course listings",
+    "GET /certificacion — Certification processes (CONOCER, standards)",
+    "GET /consultoria — Consulting areas (Climate Change, Energy, Sustainability, etc.)",
+    "GET /investigacion-consultoria — Research & consulting with ODS alignment",
+    "GET /cursos — Full course catalog by category"
+  ]
+}
