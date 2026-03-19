@@ -1,0 +1,153 @@
+---
+title: "Project Structure"
+description: "Directory layout and key files of the CIDTES Next.js 14 App Router project."
+---
+
+## Directory Tree
+
+```
+v0-cidteswebsite/
+├── app/                        # Next.js 14 App Router
+│   ├── layout.tsx              # Root layout (Geist font, metadata)
+│   ├── page.tsx                # Home page (/)
+│   ├── globals.css             # Global CSS & Tailwind base imports
+│   ├── capacitacion/
+│   │   └── page.tsx            # Capacitación route (/capacitacion)
+│   ├── certificacion/
+│   │   └── page.tsx            # Certificación route (/certificacion)
+│   ├── consultoria/
+│   │   └── page.tsx            # Consultoría route (/consultoria)
+│   ├── cursos/
+│   │   └── page.tsx            # Cursos route (/cursos)
+│   └── investigacion-consultoria/
+│       └── page.tsx            # Investigación y Consultoría route
+├── components/                 # Shared React components
+│   ├── nav-header.tsx          # Fixed navigation header
+│   ├── diagrama-circular.tsx   # Interactive SVG service diagram
+│   ├── certification-wheel.tsx # Interactive SVG certification wheel
+│   ├── certification-content.tsx
+│   ├── certification-extended-content.tsx
+│   ├── course-modal.tsx
+│   ├── course-section.tsx
+│   ├── metaball-background.tsx # Three.js metaball WebGL effect
+│   ├── standards-carousel.tsx
+│   ├── standards-list.tsx
+│   └── theme-provider.tsx
+├── lib/                        # Shared utilities
+├── public/                     # Static assets (images, icons)
+│   └── images/
+├── styles/                     # Additional CSS files
+├── components.json             # shadcn/ui configuration
+├── next.config.mjs             # Next.js configuration
+├── tailwind.config.ts          # Tailwind CSS configuration
+├── tsconfig.json               # TypeScript configuration
+├── package.json                # Dependencies & scripts
+└── pnpm-lock.yaml              # Lockfile
+```
+
+## Directory Purposes
+
+<CardGroup cols={2}>
+  <Card title="app/" icon="folder">
+    The App Router root. Every `page.tsx` inside becomes a public route. The `layout.tsx` at the root wraps every page with the Geist font and shared HTML structure.
+  </Card>
+  <Card title="components/" icon="puzzle-piece">
+    All reusable React components. Components marked `"use client"` run in the browser; others are server components by default.
+  </Card>
+  <Card title="lib/" icon="wrench">
+    Shared utility functions and helpers used across components and pages.
+  </Card>
+  <Card title="public/" icon="image">
+    Static files served at the root URL. All images (logos, backgrounds, client logos) live under `public/images/`.
+  </Card>
+  <Card title="styles/" icon="paintbrush">
+    Additional CSS beyond `globals.css`. Custom animations and page-specific overrides live here.
+  </Card>
+  <Card title="components.json" icon="file-code">
+    shadcn/ui configuration: defines the component library style, Tailwind CSS variables mapping, and the `@/*` import alias used by all components.
+  </Card>
+</CardGroup>
+
+## App Router Route Structure
+
+The project uses the **Next.js 14 App Router** (`app/` directory). Each folder with a `page.tsx` is a publicly accessible route:
+
+| Route | File | Page |
+|---|---|---|
+| `/` | `app/page.tsx` | Home — about, commitments, service diagram |
+| `/capacitacion` | `app/capacitacion/page.tsx` | Training services |
+| `/certificacion` | `app/certificacion/page.tsx` | Certification processes |
+| `/consultoria` | `app/consultoria/page.tsx` | Consulting services |
+| `/investigacion-consultoria` | `app/investigacion-consultoria/page.tsx` | Research & consulting |
+| `/cursos` | `app/cursos/page.tsx` | Course catalogue |
+
+<Info>
+  All pages are `"use client"` components because they rely on React state for interactive UI elements such as carousels, the circular diagram, and the certification wheel.
+</Info>
+
+## Root Layout
+
+`app/layout.tsx` sets global metadata and injects the **Geist** font family (both Sans and Mono variants from the `geist` package):
+
+```typescript
+import type { Metadata } from "next"
+import { GeistSans } from "geist/font/sans"
+import { GeistMono } from "geist/font/mono"
+
+export const metadata: Metadata = {
+  title: "CIDTES",
+  description: "Created by CIDTES",
+  icons: { icon: "/images/logo-simple.png" },
+}
+```
+
+## Key Configuration Files
+
+<Tabs>
+  <Tab title="next.config.mjs">
+    ```javascript
+    const nextConfig = {
+      eslint: {
+        ignoreDuringBuilds: true,  // ESLint errors won't fail CI builds
+      },
+      typescript: {
+        ignoreBuildErrors: true,   // TS errors won't fail CI builds
+      },
+      images: {
+        unoptimized: true,         // Serves images as-is (no Next.js optimisation)
+      },
+    }
+    ```
+
+    `images.unoptimized: true` is set because the site is deployed to Vercel's static hosting tier where the Image Optimization API is not required.
+  </Tab>
+  <Tab title="tailwind.config.ts">
+    Tailwind v3 with `darkMode: ["class"]`. Extends the default theme with:
+
+    - **CSS variable-based colours** — `background`, `foreground`, `card`, `primary`, `secondary`, `muted`, `accent`, `destructive`, `border`, `input`, `ring`, `chart-1…5`, and `sidebar-*` tokens
+    - **Custom border radius** — `lg`, `md`, `sm` mapped to `--radius` CSS variable
+    - **Custom keyframes** — `accordion-down` and `accordion-up` for Radix UI accordion animations
+    - **Plugin** — `tailwindcss-animate`
+
+    Content globs scan `pages/**`, `components/**`, `app/**`, and root-level files.
+  </Tab>
+  <Tab title="tsconfig.json">
+    ```json
+    {
+      "compilerOptions": {
+        "target": "ES6",
+        "strict": true,
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "jsx": "preserve",
+        "incremental": true,
+        "paths": {
+          "@/*": ["./*"]
+        }
+      }
+    }
+    ```
+
+    The `@/*` path alias maps to the project root, so `import { NavHeader } from "@/components/nav-header"` resolves to `./components/nav-header.tsx`.
+  </Tab>
+</Tabs>

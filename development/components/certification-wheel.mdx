@@ -1,0 +1,163 @@
+---
+title: "CertificationWheel"
+description: "Interactive SVG wheel with four clickable quadrant sections for the certification page."
+---
+
+## Overview
+
+`CertificationWheel` renders a 550 × 550 ring divided into four equal 90° quadrants. Clicking a quadrant highlights it with a colour gradient and fires the `onSectionChange` callback. Inactive quadrants display in a neutral grey gradient. The CIDTES logo sits in the transparent centre of the ring.
+
+**Source file:** `components/certification-wheel.tsx`
+
+## Import
+
+```typescript
+import CertificationWheel from "@/components/certification-wheel"
+```
+
+## Props
+
+<ParamField path="onSectionChange" type="(section: SectionKey | null) => void" required>
+  Called when the user clicks a section to toggle it. Receives the numeric key `0 | 1 | 2 | 3` of the activated section, or `null` when the same section is clicked again to deactivate it.
+</ParamField>
+
+<ParamField path="currentColor" type="string" required>
+  The active accent colour as a hex string (e.g. `"#9470DE"`). Currently received from the parent but not directly consumed inside the SVG — the parent page uses it to drive the `MetaballBackground` colour.
+</ParamField>
+
+## Section Definitions
+
+The four sections are laid out as quadrants starting from the top, rotating clockwise:
+
+| Key (`SectionKey`) | Label | Angular Range | Active Colour | Active Gradient ID |
+|---|---|---|---|---|
+| `0` | Conocer | −45° – 45° (top) | `#9470DE` | `g-purple` |
+| `1` | Proceso de Evaluación | 45° – 135° (right) | `#74B74A` | `g-green` |
+| `2` | ¿Dónde puedo certificarme? | 135° – 225° (bottom) | `#005BB1` | `g-blue` |
+| `3` | Estándares ofertados | 225° – 315° (left) | `#13D4CB` | `g-aqua` |
+
+When a section is **inactive** it uses the `g-gray` gradient (`#BFBABA` → `#DDDDDD`). When **active** it switches to its colour gradient. Text labels change from `#8B8B8B` to `#FFFFFF` when the section becomes active.
+
+## SVG Geometry
+
+```typescript
+const CFG = {
+  view:   700,   // SVG viewBox dimension
+  cx:     350,   // Centre X
+  cy:     350,   // Centre Y
+  rOuter: 320,   // Outer radius of the ring
+  rInner: 100,   // Inner radius (creates the hollow centre)
+  rim:    10,    // White border stroke width around the outer edge
+  divider: 12,   // White divider line width between sections
+}
+```
+
+Angles use a **clock convention** (0° = up, clockwise) converted internally:
+
+```typescript
+const d2r = (deg: number) => ((deg - 90) * Math.PI) / 180
+```
+
+Each quadrant is a `ringSlice` path — an arc segment with inner and outer radii, drawn as:
+
+```
+M outer-start → A outer-arc → L inner-end → A inner-arc-back → Z
+```
+
+## Toggle Logic
+
+The component manages its own active state:
+
+```typescript
+const [active, setActive] = useState<SectionKey | null>(null)
+
+const toggle = (k: SectionKey) => {
+  setActive(active === k ? null : k)  // click active section → deselect
+  onSectionChange(active === k ? null : k)
+}
+```
+
+Clicking an already-active section sets both local state and the parent callback to `null`, returning the wheel to its fully grey state.
+
+## Usage Example
+
+This is how the component is used on `app/certificacion/page.tsx`:
+
+```typescript
+"use client"
+
+import { useState } from "react"
+import CertificationWheel from "@/components/certification-wheel"
+import { MetaballBackground } from "@/components/metaball-background"
+
+type SectionKey = 0 | 1 | 2 | 3
+
+export default function CertificacionPage() {
+  const [currentColor, setCurrentColor] = useState("#9470DE")
+  const [activeSection, setActiveSection] = useState<SectionKey | null>(null)
+
+  const handleSectionChange = (section: SectionKey | null) => {
+    setActiveSection(section)
+    if (section !== null) {
+      const colors = {
+        0: "#9470DE",  // purple  — Conocer
+        1: "#74B74A",  // green   — Proceso de Evaluación
+        2: "#005BB1",  // blue    — ¿Dónde puedo certificarme?
+        3: "#13D4CB",  // aqua    — Estándares ofertados
+      }
+      setCurrentColor(colors[section])
+    }
+  }
+
+  return (
+    <section className="relative bg-[#0f0f0f] min-h-screen">
+      {/* Metaball background reacts to the active section colour */}
+      <MetaballBackground color={currentColor} />
+
+      <div className="relative z-10 flex flex-col lg:flex-row items-center">
+        {/* Wheel on the left */}
+        <CertificationWheel
+          onSectionChange={handleSectionChange}
+          currentColor={currentColor}
+        />
+
+        {/* Section content on the right */}
+        <div className="w-full lg:w-3/5 lg:pl-16">
+          {/* CertificationContent reads activeSection to show the right content */}
+        </div>
+      </div>
+    </section>
+  )
+}
+```
+
+## Centre Logo
+
+The CIDTES logo is rendered in a `<div>` positioned absolutely over the SVG using `pointer-events-none` so it does not intercept click events on the wheel sections:
+
+```typescript
+<div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+  <Image
+    src="/images/design-mode/image.png"
+    alt="Logo CIDTES"
+    width={300}
+    height={300}
+    className="object-contain"
+    priority
+  />
+</div>
+```
+
+## Visual Decorations
+
+<AccordionGroup>
+  <Accordion title="White rim and dividers">
+    A white `<circle>` with `strokeWidth={10}` traces the outer edge of the ring, giving a clean border. Four white `<line>` elements at −45°, 45°, 135°, and 225° draw `12px`-wide dividers between quadrants.
+  </Accordion>
+  <Accordion title="Gradient definitions">
+    Five `<linearGradient>` elements are defined in `<defs>`: `g-gray` (inactive), `g-purple`, `g-green`, `g-blue`, and `g-aqua`. Each active gradient runs from a darker shade to a lighter shade of the section colour.
+  </Accordion>
+  <Accordion title="Drop shadow">
+    The `<svg>` element has `filter: drop-shadow(0 30px 60px rgba(0,0,0,.35))` applied via inline style, lifting the wheel visually above the dark `MetaballBackground`.
+  </Accordion>
+</AccordionGroup>
